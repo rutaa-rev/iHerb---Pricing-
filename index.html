@@ -1,0 +1,256 @@
+import { useState, useEffect } from "react";
+
+const G = "#2A7C6F", GD = "#1E5C52", GL = "#34A08F", GBG = "#EDF6F4", W = "#fff", D = "#1a1a1a", GY = "#6b7280", BD = "#e5e7eb", CR = "#f9fafb";
+
+const fmt = v => "$" + Math.round(v).toLocaleString();
+const pct = v => v.toFixed(0) + "%";
+const fmtK = v => v >= 1e6 ? (v/1e6).toFixed(1)+"M" : v >= 1e3 ? Math.round(v/1e3)+"K" : v.toString();
+
+const Input = ({label, sub, value, onChange, prefix, suffix, min=0, max, step=1, disabled}) => (
+  <div style={{marginBottom:14}}>
+    <div style={{fontSize:12,fontWeight:600,color:D}}>{label}</div>
+    {sub && <div style={{fontSize:10,color:GY}}>{sub}</div>}
+    <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
+      {prefix && <span style={{fontSize:12,color:GY}}>{prefix}</span>}
+      <input type="number" value={value} onChange={e=>onChange(Number(e.target.value))} min={min} max={max} step={step} disabled={disabled}
+        style={{width:"100%",padding:"6px 10px",border:`1px solid ${BD}`,borderRadius:6,fontSize:13,fontFamily:"inherit",background:disabled?"#f3f4f6":W,color:D}} />
+      {suffix && <span style={{fontSize:12,color:GY,whiteSpace:"nowrap"}}>{suffix}</span>}
+    </div>
+  </div>
+);
+
+const Slider = ({label, value, onChange, min=0, max=100}) => (
+  <div style={{marginBottom:10}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <span style={{fontSize:11,color:D}}>{label}</span>
+      <span style={{fontSize:13,fontWeight:700,color:G}}>{value}%</span>
+    </div>
+    <input type="range" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}
+      style={{width:"100%",accentColor:G,marginTop:2}} />
+  </div>
+);
+
+const KPI = ({label, value, sub}) => (
+  <div style={{flex:1,background:GBG,borderRadius:10,padding:"16px 14px",textAlign:"center",border:`1px solid ${G}22`}}>
+    <div style={{fontSize:22,fontWeight:800,color:G}}>{value}</div>
+    <div style={{fontSize:11,fontWeight:600,color:D,marginTop:2}}>{label}</div>
+    {sub && <div style={{fontSize:9,color:GY,marginTop:2}}>{sub}</div>}
+  </div>
+);
+
+export default function App() {
+  const [web, setWeb] = useState(75000);
+  const [app, setApp] = useState(13837);
+  const [email, setEmail] = useState(0);
+  const [msgAR1, setMsgAR1] = useState(77);
+  const [msgAR2, setMsgAR2] = useState(84);
+  const [msgAR3, setMsgAR3] = useState(93);
+  const [emAR1, setEmAR1] = useState(30);
+  const [emAR2, setEmAR2] = useState(33);
+  const [emAR3, setEmAR3] = useState(36);
+  const [cpc, setCpc] = useState(12);
+  const [growth, setGrowth] = useState(10);
+  const [vendorSave, setVendorSave] = useState(75000);
+  const [adaFee, setAdaFee] = useState(450000);
+  const [included, setIncluded] = useState(1200000);
+  const [ovRate, setOvRate] = useState(0.45);
+  const [ovBlock, setOvBlock] = useState(1000);
+
+  const totalMo = web + app + email;
+  const msgMo = web + app;
+  const emMo = email;
+
+  // Yearly volumes with growth
+  const g = growth / 100;
+  const msgY = [msgMo*12, Math.round(msgMo*12*(1+g)), Math.round(msgMo*12*(1+g)**2)];
+  const emY = [emMo*12, Math.round(emMo*12*(1+g)), Math.round(emMo*12*(1+g)**2)];
+  const totalY = msgY.map((m,i) => m + emY[i]);
+
+  // Resolved
+  const msgAR = [msgAR1/100, msgAR2/100, msgAR3/100];
+  const emAR = [emAR1/100, emAR2/100, emAR3/100];
+  const resolvedY = msgY.map((m,i) => Math.round(m * msgAR[i] + emY[i] * emAR[i]));
+  const humanY = totalY.map((t,i) => t - resolvedY[i]);
+
+  // Savings
+  const savingsY = resolvedY.map(r => r * cpc);
+  const vendorY = [vendorSave, 0, 0];
+  const grossY = savingsY.map((s,i) => s + vendorY[i]);
+
+  // Ada cost
+  const adaCostY = totalY.map(t => {
+    if (t <= included) return adaFee;
+    const over = t - included;
+    const blocks = Math.ceil(over / ovBlock);
+    return adaFee + blocks * ovBlock * ovRate;
+  });
+
+  const netY = grossY.map((g,i) => g - adaCostY[i]);
+  const total3Savings = grossY.reduce((a,b)=>a+b,0);
+  const total3Net = netY.reduce((a,b)=>a+b,0);
+  const total3Ada = adaCostY.reduce((a,b)=>a+b,0);
+  const roiMult = total3Ada > 0 ? total3Net / total3Ada : 0;
+  const fte = Math.round(humanY[2] > 0 ? resolvedY[2] / (humanY[2] / (totalY[2] / resolvedY[2])) / 2000 : resolvedY[2] / 2000);
+
+  // Chart bar heights
+  const maxBar = Math.max(...grossY, ...adaCostY, 1);
+  const barH = v => Math.max(4, (v / maxBar) * 160);
+
+  return (
+    <div style={{fontFamily:"'Inter',-apple-system,sans-serif",background:"#f0fdf4",minHeight:"100vh"}}>
+      {/* Header */}
+      <div style={{background:`linear-gradient(135deg,${GD},${G})`,padding:"20px 32px",display:"flex",alignItems:"center",gap:16}}>
+        <div style={{background:W,borderRadius:8,padding:"6px 14px",fontWeight:800,color:G,fontSize:16}}>ada</div>
+        <div>
+          <div style={{fontSize:20,fontWeight:700,color:W}}>ROI Scenario Modeller</div>
+          <div style={{fontSize:12,color:"#a7f3d0"}}>Template × Ada AI Agent</div>
+        </div>
+        <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 16px",fontSize:12,color:W,fontWeight:600}}>Interactive Model</div>
+      </div>
+
+      <div style={{display:"flex",gap:0,minHeight:"calc(100vh - 72px)"}}>
+        {/* LEFT PANEL */}
+        <div style={{width:320,background:W,borderRight:`1px solid ${BD}`,padding:20,overflowY:"auto",flexShrink:0}}>
+          <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:12}}>Conversation Volume (Monthly)</div>
+          <Input label="Web Chat" sub="Current platform · always active" value={web} onChange={setWeb} suffix="/mo" />
+          <Input label="In-App Chat" sub="Mobile app conversations" value={app} onChange={setApp} suffix="/mo" />
+          <Input label="Email" sub="Email automation conversations" value={email} onChange={setEmail} suffix="/mo" />
+          <div style={{background:GBG,borderRadius:8,padding:"10px 12px",marginBottom:16}}>
+            <div style={{fontSize:11,color:GY}}>Total Monthly</div>
+            <div style={{fontSize:18,fontWeight:800,color:G}}>{totalMo.toLocaleString()}</div>
+            <div style={{fontSize:9,color:GY}}>{growth}% YoY growth applied in model</div>
+          </div>
+
+          <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:8}}>AI Performance — Automated Resolution Rate</div>
+          <div style={{fontSize:12,fontWeight:600,color:D,marginBottom:6}}>Messaging</div>
+          <Slider label="Year 1" value={msgAR1} onChange={setMsgAR1} />
+          <Slider label="Year 2" value={msgAR2} onChange={setMsgAR2} />
+          <Slider label="Year 3" value={msgAR3} onChange={setMsgAR3} />
+
+          <div style={{fontSize:12,fontWeight:600,color:D,marginBottom:6,marginTop:10}}>Email {email===0 && <span style={{fontSize:10,color:GY}}>(enable Email above)</span>}</div>
+          <Slider label="Year 1" value={emAR1} onChange={setEmAR1} />
+          <Slider label="Year 2" value={emAR2} onChange={setEmAR2} />
+          <Slider label="Year 3" value={emAR3} onChange={setEmAR3} />
+
+          <div style={{borderTop:`1px solid ${BD}`,marginTop:16,paddingTop:16}}>
+            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:12}}>Cost Assumptions</div>
+            <Input label="Cost per human conversation" value={cpc} onChange={setCpc} prefix="$" />
+            <Input label="Volume growth rate (YoY)" value={growth} onChange={setGrowth} suffix="%" />
+            <Input label="Vendor consolidation (Yr 1)" value={vendorSave} onChange={setVendorSave} prefix="$" />
+          </div>
+
+          <div style={{borderTop:`1px solid ${BD}`,marginTop:16,paddingTop:16}}>
+            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:12}}>Ada Contract Pricing</div>
+            <Input label="Annual contract fee" value={adaFee} onChange={setAdaFee} prefix="$" />
+            <Input label="Included conversations/yr" value={included} onChange={setIncluded} />
+            <Input label="Overage rate (per convo)" value={ovRate} onChange={setOvRate} prefix="$" step={0.01} />
+            <Input label="Overage block size" value={ovBlock} onChange={setOvBlock} />
+          </div>
+        </div>
+
+        {/* RIGHT PANEL */}
+        <div style={{flex:1,padding:24,overflowY:"auto"}}>
+          {/* Chart */}
+          <div style={{background:W,borderRadius:12,padding:20,border:`1px solid ${BD}`,marginBottom:20}}>
+            <div style={{fontSize:12,color:GY,marginBottom:8}}>Adjust channels and volumes in the left panel · {growth}% YoY growth applied</div>
+            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:32,height:200,paddingBottom:30,position:"relative"}}>
+              {/* Baseline */}
+              <div style={{position:"absolute",bottom:28,left:0,right:0,borderTop:`1px dashed ${BD}`}}></div>
+              {["Year 1","Year 2","Year 3"].map((yr,i) => (
+                <div key={i} style={{display:"flex",gap:8,alignItems:"flex-end",textAlign:"center"}}>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+                    <div style={{fontSize:9,color:G,fontWeight:600,marginBottom:2}}>{fmtK(grossY[i])}</div>
+                    <div style={{width:36,height:barH(grossY[i]),background:`linear-gradient(180deg,${GL},${G})`,borderRadius:"6px 6px 0 0"}}></div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
+                    <div style={{fontSize:9,color:"#dc2626",fontWeight:600,marginBottom:2}}>{fmtK(adaCostY[i])}</div>
+                    <div style={{width:36,height:barH(adaCostY[i]),background:"linear-gradient(180deg,#fca5a5,#ef4444)",borderRadius:"6px 6px 0 0"}}></div>
+                  </div>
+                  <div style={{position:"absolute",bottom:6,fontSize:11,fontWeight:600,color:D}}></div>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"center",gap:80,fontSize:11,fontWeight:600,color:D}}>
+              <span>Year 1</span><span>Year 2</span><span>Year 3</span>
+            </div>
+            <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:8,fontSize:10,color:GY}}>
+              <span><span style={{display:"inline-block",width:10,height:10,background:G,borderRadius:2,marginRight:4,verticalAlign:"middle"}}></span>Savings</span>
+              <span><span style={{display:"inline-block",width:10,height:10,background:"#ef4444",borderRadius:2,marginRight:4,verticalAlign:"middle"}}></span>Ada Cost</span>
+            </div>
+          </div>
+
+          {/* KPIs */}
+          <div style={{display:"flex",gap:12,marginBottom:20}}>
+            <KPI label="3-Year Total Savings" value={fmt(total3Savings)} sub="Before Ada cost" />
+            <KPI label="3-Year Net ROI" value={fmt(total3Net)} sub="After Ada cost" />
+            <KPI label="Year 3 ROI Multiple" value={roiMult.toFixed(1)+"x"} sub="Return per $1 invested" />
+            <KPI label="FTEs Freed (Year 3)" value={fte} sub="Agent headcount equivalent" />
+          </div>
+
+          {/* Volume Table */}
+          <div style={{background:W,borderRadius:12,padding:20,border:`1px solid ${BD}`,marginBottom:20}}>
+            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:4}}>Annual Conversation Volume</div>
+            <div style={{fontSize:10,color:GY,marginBottom:10}}>{growth}% YoY growth applied to Year 1 inputs</div>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+              <thead>
+                <tr style={{background:G}}>
+                  {["Channel","Year 1","Year 2","Year 3","3-Year Total"].map(h=>(
+                    <th key={h} style={{padding:"8px 10px",textAlign:h==="Channel"?"left":"right",color:W,fontWeight:600}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ["Messaging",msgY[0],msgY[1],msgY[2],msgY.reduce((a,b)=>a+b,0)],
+                  ...(email>0?[["Email",emY[0],emY[1],emY[2],emY.reduce((a,b)=>a+b,0)]]:[]),
+                  ["Total",totalY[0],totalY[1],totalY[2],totalY.reduce((a,b)=>a+b,0)]
+                ].map((r,i,a)=>(
+                  <tr key={i} style={{background:i===a.length-1?GBG:i%2===0?W:CR,fontWeight:i===a.length-1?700:400}}>
+                    <td style={{padding:"8px 10px",borderBottom:`1px solid ${BD}`}}>{r[0]}</td>
+                    {[1,2,3,4].map(j=><td key={j} style={{padding:"8px 10px",textAlign:"right",borderBottom:`1px solid ${BD}`,color:i===a.length-1?G:D}}>{r[j].toLocaleString()}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Financial Model Table */}
+          <div style={{background:W,borderRadius:12,padding:20,border:`1px solid ${BD}`,marginBottom:20}}>
+            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:4}}>3-Year Financial Model</div>
+            <div style={{fontSize:10,color:GY,marginBottom:10}}>All values in USD</div>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+              <thead>
+                <tr style={{background:G}}>
+                  {["Line Item","Year 1","Year 2","Year 3"].map(h=>(
+                    <th key={h} style={{padding:"8px 10px",textAlign:h==="Line Item"?"left":"right",color:W,fontWeight:600}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {l:"Total Conversations",v:totalY,b:false,c:D},
+                  {l:"AI Resolved",v:resolvedY,b:false,c:G},
+                  {l:"Human Handled",v:humanY,b:false,c:D},
+                  {l:"Resolution Savings",v:savingsY,b:false,c:D,f:true},
+                  {l:"Vendor Consolidation",v:vendorY,b:false,c:D,f:true},
+                  {l:"Gross Savings",v:grossY,b:true,c:G,f:true},
+                  {l:"Ada Cost",v:adaCostY,b:false,c:"#dc2626",f:true,bg:"#fef2f2"},
+                  {l:"Net Savings",v:netY,b:true,c:G,f:true,bg:GBG},
+                ].map((r,i)=>(
+                  <tr key={i} style={{background:r.bg||(i%2===0?W:CR)}}>
+                    <td style={{padding:"8px 10px",fontWeight:r.b?700:400,borderBottom:`1px solid ${BD}`,color:r.c}}>{r.l}</td>
+                    {r.v.map((val,j)=>(
+                      <td key={j} style={{padding:"8px 10px",textAlign:"right",fontWeight:r.b?700:400,borderBottom:`1px solid ${BD}`,color:r.c}}>
+                        {r.f?fmt(val):val.toLocaleString()}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
