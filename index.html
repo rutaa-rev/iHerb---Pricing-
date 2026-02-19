@@ -6,9 +6,9 @@
 <title>iHerb X Ada - Pricing + ROI Calculator - V11</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-:root{--P:#6C2BD9;--PD:#4C1D95;--PL:#8B5CF6;--PBG:#F5F3FF;--W:#fff;--D:#111827;--GY:#6b7280;--BD:#e5e7eb;--CR:#f9fafb;--GR:#10b981;--RD:#ef4444;--AM:#f59e0b;--BL:#3B82F6}
+:root{--P:#3B7A0D;--PD:#2D5F0A;--PL:#5FA033;--PBG:#F0F9E8;--W:#fff;--D:#111827;--GY:#6b7280;--BD:#e5e7eb;--CR:#f9fafb;--GR:#10b981;--RD:#ef4444;--AM:#f59e0b;--BL:#3B82F6}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',-apple-system,sans-serif;background:#faf5ff;min-height:100vh}
+body{font-family:'Inter',-apple-system,sans-serif;background:#f0f9e8;min-height:100vh}
 input[type=number]{width:100%;padding:5px 8px;border:1px solid var(--BD);border-radius:6px;font-size:12px;font-family:inherit;color:var(--D)}
 input[type=number]:disabled{background:#f3f4f6}
 input[type=range]{width:100%;accent-color:var(--P);margin:0}
@@ -18,7 +18,7 @@ input[type=range]{width:100%;accent-color:var(--P);margin:0}
 .header .sub{font-size:11px;color:#ddd6fe}
 .header .badge{margin-left:auto;background:rgba(255,255,255,.15);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--W);font-weight:600}
 .layout{display:flex;min-height:calc(100vh - 60px)}
-.left{width:320px;background:var(--W);border-right:1px solid var(--BD);padding:16px 18px;overflow-y:auto;flex-shrink:0}
+.left{width:320px;background:#1a2e12;border-right:1px solid #2d4a1f;padding:16px 18px;overflow-y:auto;flex-shrink:0}
 .right{flex:1;padding:20px;overflow-y:auto}
 .card{background:var(--W);border-radius:12px;padding:18px;border:1px solid var(--BD);margin-bottom:16px}
 .section-title{font-size:13px;font-weight:700;color:var(--D);margin-bottom:10px}
@@ -40,6 +40,19 @@ input[type=range]{width:100%;accent-color:var(--P);margin:0}
 .ar-sliders .yr{font-size:9px;color:var(--GY);font-weight:600;margin-bottom:4px}
 .ar-sliders .pct{font-size:14px;font-weight:800;margin-top:2px}
 .divider{border-top:1px solid var(--BD);margin-top:14px;padding-top:14px}
+/* Left panel dark overrides */
+.left .section-title{color:#e2e8d0}
+.left .inp-group label{color:#d1dbc4}
+.left .inp-group .sub{color:#8a9a7a}
+.left .inp-row .pre,.left .inp-row .suf{color:#8a9a7a}
+.left .total-box{background:#2d4a1f}
+.left .total-box .val{color:#7ddf3a}
+.left .total-box .lbl{color:#8a9a7a}
+.left .divider{border-top-color:#2d4a1f}
+.left .ar-sliders .yr{color:#8a9a7a}
+.left .ar-sliders .pct{color:#7ddf3a}
+.left input[type=number]{background:#253d1a;border-color:#3d5f2a;color:#e2e8d0}
+.left input[type=range]{accent-color:#5FA033}
 .kpi-row{display:flex;gap:10px;margin-bottom:16px}
 .kpi{flex:1;background:var(--PBG);border-radius:10px;padding:14px 10px;text-align:center;border:1px solid rgba(108,43,217,.13)}
 .kpi .val{font-size:20px;font-weight:800;color:var(--P)}
@@ -111,44 +124,44 @@ table tbody td:not(:first-child){text-align:right}
     <div class="lbl"><span id="growthLabel">10</span>% YoY growth applied in model</div>
   </div>
 
-  <div style="font-size:12px;font-weight:700;color:var(--D);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">AI Performance - Automated Resolution Rate</div>
+  <div style="font-size:12px;font-weight:700;color:#d1dbc4;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">AI Performance - Automated Resolution Rate</div>
 
   <div class="ar-section">
-    <span class="ar-label" style="color:var(--P);background:#6C2BD918">Messaging</span>
+    <span class="ar-label" style="color:#7ddf3a;background:#3B7A0D33">Messaging</span>
     <div class="ar-sliders">
-      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="48" id="m1" oninput="calc()" style="accent-color:var(--P)"><div class="pct" style="color:var(--P)" id="m1v">48%</div></div>
-      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="58" id="m2" oninput="calc()" style="accent-color:var(--P)"><div class="pct" style="color:var(--P)" id="m2v">58%</div></div>
-      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="63" id="m3" oninput="calc()" style="accent-color:var(--P)"><div class="pct" style="color:var(--P)" id="m3v">63%</div></div>
+      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="48" id="m1" oninput="calc()"><div class="pct" id="m1v">48%</div></div>
+      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="58" id="m2" oninput="calc()"><div class="pct" id="m2v">58%</div></div>
+      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="63" id="m3" oninput="calc()"><div class="pct" id="m3v">63%</div></div>
     </div>
   </div>
 
   <div class="ar-section" id="sbAR" style="opacity:.5">
-    <span class="ar-label" style="color:var(--BL);background:#3B82F618">Search Bar</span>
-    <span style="font-size:9px;color:var(--GY);margin-left:4px" id="sbHint">(enable Search Bar above)</span>
+    <span class="ar-label" style="color:#60a5fa;background:#3B82F633">Search Bar</span>
+    <span style="font-size:9px;color:#8a9a7a;margin-left:4px" id="sbHint">(enable Search Bar above)</span>
     <div class="ar-sliders">
-      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="88" id="s1" oninput="calc()" style="accent-color:var(--BL)"><div class="pct" style="color:var(--BL)" id="s1v">88%</div></div>
-      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="60" id="s2" oninput="calc()" style="accent-color:var(--BL)"><div class="pct" style="color:var(--BL)" id="s2v">60%</div></div>
-      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="70" id="s3" oninput="calc()" style="accent-color:var(--BL)"><div class="pct" style="color:var(--BL)" id="s3v">70%</div></div>
+      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="88" id="s1" oninput="calc()" style="accent-color:#60a5fa"><div class="pct" style="color:#60a5fa" id="s1v">88%</div></div>
+      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="60" id="s2" oninput="calc()" style="accent-color:#60a5fa"><div class="pct" style="color:#60a5fa" id="s2v">60%</div></div>
+      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="70" id="s3" oninput="calc()" style="accent-color:#60a5fa"><div class="pct" style="color:#60a5fa" id="s3v">70%</div></div>
     </div>
   </div>
 
   <div class="ar-section" id="emlAR" style="opacity:.5">
-    <span class="ar-label" style="color:var(--GR);background:#10b98118">Email</span>
-    <span style="font-size:9px;color:var(--GY);margin-left:4px">(enable Email above)</span>
+    <span class="ar-label" style="color:#6ee7b7;background:#10b98133">Email</span>
+    <span style="font-size:9px;color:#8a9a7a;margin-left:4px">(enable Email above)</span>
     <div class="ar-sliders">
-      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="30" id="e1" oninput="calc()" style="accent-color:var(--GR)"><div class="pct" style="color:var(--GR)" id="e1v">30%</div></div>
-      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="33" id="e2" oninput="calc()" style="accent-color:var(--GR)"><div class="pct" style="color:var(--GR)" id="e2v">33%</div></div>
-      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="36" id="e3" oninput="calc()" style="accent-color:var(--GR)"><div class="pct" style="color:var(--GR)" id="e3v">36%</div></div>
+      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="30" id="e1" oninput="calc()" style="accent-color:#6ee7b7"><div class="pct" style="color:#6ee7b7" id="e1v">30%</div></div>
+      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="33" id="e2" oninput="calc()" style="accent-color:#6ee7b7"><div class="pct" style="color:#6ee7b7" id="e2v">33%</div></div>
+      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="36" id="e3" oninput="calc()" style="accent-color:#6ee7b7"><div class="pct" style="color:#6ee7b7" id="e3v">36%</div></div>
     </div>
   </div>
 
   <div class="ar-section" id="voiAR" style="opacity:.5">
-    <span class="ar-label" style="color:var(--AM);background:#f59e0b18">Voice</span>
-    <span style="font-size:9px;color:var(--GY);margin-left:4px">(enable Voice above)</span>
+    <span class="ar-label" style="color:#fcd34d;background:#f59e0b33">Voice</span>
+    <span style="font-size:9px;color:#8a9a7a;margin-left:4px">(enable Voice above)</span>
     <div class="ar-sliders">
-      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="25" id="v1" oninput="calc()" style="accent-color:var(--AM)"><div class="pct" style="color:var(--AM)" id="v1v">25%</div></div>
-      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="30" id="v2" oninput="calc()" style="accent-color:var(--AM)"><div class="pct" style="color:var(--AM)" id="v2v">30%</div></div>
-      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="35" id="v3" oninput="calc()" style="accent-color:var(--AM)"><div class="pct" style="color:var(--AM)" id="v3v">35%</div></div>
+      <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="25" id="v1" oninput="calc()" style="accent-color:#fcd34d"><div class="pct" style="color:#fcd34d" id="v1v">25%</div></div>
+      <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="30" id="v2" oninput="calc()" style="accent-color:#fcd34d"><div class="pct" style="color:#fcd34d" id="v2v">30%</div></div>
+      <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="35" id="v3" oninput="calc()" style="accent-color:#fcd34d"><div class="pct" style="color:#fcd34d" id="v3v">35%</div></div>
     </div>
   </div>
 
