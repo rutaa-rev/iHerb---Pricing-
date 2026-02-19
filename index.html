@@ -168,6 +168,7 @@ table tbody td:not(:first-child){text-align:right}
   <div class="divider">
     <div class="section-title">Cost Assumptions</div>
     <div class="inp-group"><label>Cost per Ticket (Handled by Human)</label><div class="inp-row"><span class="pre">$</span><input type="number" id="cpc" value="2.61" min="0" step="0.01" oninput="calc()"></div></div>
+    <div class="inp-group"><label>Average Handle Time - AHT (Mins)</label><div class="inp-row"><input type="number" id="aht" value="12" min="0" step="0.5" oninput="calc()"><span class="suf">mins</span></div></div>
     <div class="inp-group"><label>Volume growth rate (YoY)</label><div class="inp-row"><input type="number" id="growth" value="10" min="0" oninput="calc()"><span class="suf">%</span></div></div>
   </div>
 </div>
@@ -282,6 +283,7 @@ function calcVoiceCost(v){
 function calc(){
   var web=gv('web'),app=gv('appVol'),eml=gv('emlVol'),voi=gv('voiVol');
   var cpc=gv('cpc'),gr=gv('growth')/100;
+  var aht=gv('aht');
 
   // Update AR labels
   var arList=['m1','m2','m3','s1','s2','s3','e1','e2','e3','v1','v2','v3'];
@@ -328,7 +330,12 @@ function calc(){
   var t3N=netY[0]+netY[1]+netY[2];
   var t3A=adaY[0]+adaY[1]+adaY[2];
   var roi=t3A>0?t3N/t3A:0;
-  var fte=Math.round(resY[2]/2000);
+  // FTE per year
+  var fteY=[];
+  for(var i=0;i<3;i++){
+    fteY[i]=aht>0?Math.round((resY[i]*(aht/60))/2080):0;
+  }
+  var fte=fteY[2];
 
   // === PRICING TABLE ===
   var pb='';
@@ -405,6 +412,7 @@ function calc(){
     ['Total Conversations',tY,false,false],
     ['AI Resolved',resY,false,false],
     ['Human Handled',humY,false,false],
+    ['FTE Savings',fteY,'yellow',false],
     ['Resolution Savings',savY,false,true],
     ['Gross Savings',groY,true,true],
     ['Ada Cost',adaY,'danger',true],
@@ -413,9 +421,9 @@ function calc(){
   var fb='';
   for(var r=0;r<rows.length;r++){
     var row=rows[r],hl=row[2],isF=row[3];
-    var bg=hl==='danger'?'background:#fef2f2':hl?'background:var(--PBG)':'background:'+(r%2===0?'var(--W)':'var(--CR)');
-    var tc=hl==='danger'?'color:var(--RD)':hl?'color:var(--P)':'color:var(--D)';
-    var fw=hl?'font-weight:700':'font-weight:400';
+    var bg=hl==='danger'?'background:#fef2f2':hl==='yellow'?'background:#FEF3C7':hl?'background:var(--PBG)':'background:'+(r%2===0?'var(--W)':'var(--CR)');
+    var tc=hl==='danger'?'color:var(--RD)':hl==='yellow'?'color:#92400E':hl?'color:var(--P)':'color:var(--D)';
+    var fw=(hl)?'font-weight:700':'font-weight:400';
     fb+='<tr style="'+bg+'"><td style="'+fw+';'+tc+'">'+row[0]+'</td>';
     for(var i=0;i<3;i++){
       var val=isF?fmt(row[1][i]):row[1][i].toLocaleString();
