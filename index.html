@@ -1,256 +1,400 @@
-import { useState, useEffect } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ada ROI Scenario Modeller</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+:root{--P:#6C2BD9;--PD:#4C1D95;--PL:#8B5CF6;--PBG:#F5F3FF;--W:#fff;--D:#111827;--GY:#6b7280;--BD:#e5e7eb;--CR:#f9fafb;--GR:#10b981;--RD:#ef4444;--AM:#f59e0b}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,sans-serif;background:#faf5ff;min-height:100vh}
+input[type=number]{width:100%;padding:5px 8px;border:1px solid var(--BD);border-radius:6px;font-size:12px;font-family:inherit;color:var(--D)}
+input[type=number]:disabled{background:#f3f4f6}
+input[type=range]{width:100%;accent-color:var(--P);margin:0}
+.header{background:linear-gradient(135deg,var(--PD),var(--P));padding:16px 28px;display:flex;align-items:center;gap:14}
+.header .logo{background:var(--W);border-radius:8px;padding:5px 14px;font-weight:800;color:var(--P);font-size:16px}
+.header h1{font-size:18px;font-weight:700;color:var(--W)}
+.header .sub{font-size:11px;color:#ddd6fe}
+.header .badge{margin-left:auto;background:rgba(255,255,255,.15);border-radius:8px;padding:5px 14px;font-size:11px;color:var(--W);font-weight:600}
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.left{width:320px;background:var(--W);border-right:1px solid var(--BD);padding:16px 18px;overflow-y:auto;flex-shrink:0}
+.right{flex:1;padding:20px;overflow-y:auto}
+.card{background:var(--W);border-radius:12px;padding:18px;border:1px solid var(--BD);margin-bottom:16px}
+.section-title{font-size:13px;font-weight:700;color:var(--D);margin-bottom:10px}
+.inp-group{margin-bottom:12px}
+.inp-group label{font-size:11px;font-weight:600;color:var(--D);display:block}
+.inp-group .sub{font-size:9px;color:var(--GY)}
+.inp-row{display:flex;align-items:center;gap:4px;margin-top:3px}
+.inp-row .pre,.inp-row .suf{font-size:11px;color:var(--GY);white-space:nowrap}
+.total-box{background:var(--PBG);border-radius:8px;padding:8px 10px;margin-bottom:12px}
+.total-box .val{font-size:18px;font-weight:800;color:var(--P)}
+.total-box .lbl{font-size:10px;color:var(--GY)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.toggle{width:36px;height:20px;border-radius:10px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle .dot{width:16px;height:16px;border-radius:8px;background:var(--W);position:absolute;top:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.ar-section{margin-bottom:14px}
+.ar-label{font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;display:inline-block}
+.ar-sliders{display:flex;gap:16px;margin-top:8px}
+.ar-sliders>div{flex:1;text-align:center}
+.ar-sliders .yr{font-size:9px;color:var(--GY);font-weight:600;margin-bottom:4px}
+.ar-sliders .pct{font-size:14px;font-weight:800;margin-top:2px}
+.divider{border-top:1px solid var(--BD);margin-top:14px;padding-top:14px}
+.kpi-row{display:flex;gap:10px;margin-bottom:16px}
+.kpi{flex:1;background:var(--PBG);border-radius:10px;padding:14px 10px;text-align:center;border:1px solid rgba(108,43,217,.13)}
+.kpi .val{font-size:20px;font-weight:800;color:var(--P)}
+.kpi .lbl{font-size:10px;font-weight:600;color:var(--D);margin-top:2px}
+.kpi .sub{font-size:8px;color:var(--GY);margin-top:1px}
+table{width:100%;border-collapse:collapse;font-size:11px}
+table thead tr{background:var(--P)}
+table thead th{padding:6px 8px;color:var(--W);font-weight:600;font-size:10px}
+table thead th:first-child{text-align:left}
+table thead th:not(:first-child){text-align:right}
+table tbody td{padding:5px 8px;border-bottom:1px solid var(--BD)}
+table tbody td:not(:first-child){text-align:right}
+.tier-header{font-size:11px;font-weight:700;color:var(--W);background:#374151;padding:6px 10px;border-radius:6px 6px 0 0;text-align:center}
+.tier-table{border:1px solid var(--BD);font-size:10px}
+.tier-table th{padding:5px 8px;background:var(--CR);font-weight:700;border-bottom:1px solid var(--BD)}
+.tier-table td{padding:4px 8px;border-bottom:1px solid var(--BD)}
+.eff-rates{display:flex;gap:12px;margin-top:10px}
+.eff-rate{flex:1;background:var(--PBG);border-radius:8px;padding:8px 10px;text-align:center}
+.eff-rate .val{font-size:14px;font-weight:800;color:var(--P)}
+.chart-legend{display:flex;justify-content:center;gap:20px;font-size:10px;color:var(--GY);margin-top:8px}
+.chart-legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.chart-legend .sav::before{background:var(--P)}
+.chart-legend .ada::before{background:var(--RD)}
+</style>
+</head>
+<body>
 
-const G = "#2A7C6F", GD = "#1E5C52", GL = "#34A08F", GBG = "#EDF6F4", W = "#fff", D = "#1a1a1a", GY = "#6b7280", BD = "#e5e7eb", CR = "#f9fafb";
+<div class="header">
+  <div class="logo">ada</div>
+  <div><h1>ROI Scenario Modeller</h1><div class="sub">Client × Ada AI Agent</div></div>
+  <div class="badge">Interactive Model</div>
+</div>
 
-const fmt = v => "$" + Math.round(v).toLocaleString();
-const pct = v => v.toFixed(0) + "%";
-const fmtK = v => v >= 1e6 ? (v/1e6).toFixed(1)+"M" : v >= 1e3 ? Math.round(v/1e3)+"K" : v.toString();
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="left" id="leftPanel">
+    <div class="section-title">Conversation Volume (Monthly)</div>
 
-const Input = ({label, sub, value, onChange, prefix, suffix, min=0, max, step=1, disabled}) => (
-  <div style={{marginBottom:14}}>
-    <div style={{fontSize:12,fontWeight:600,color:D}}>{label}</div>
-    {sub && <div style={{fontSize:10,color:GY}}>{sub}</div>}
-    <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4}}>
-      {prefix && <span style={{fontSize:12,color:GY}}>{prefix}</span>}
-      <input type="number" value={value} onChange={e=>onChange(Number(e.target.value))} min={min} max={max} step={step} disabled={disabled}
-        style={{width:"100%",padding:"6px 10px",border:`1px solid ${BD}`,borderRadius:6,fontSize:13,fontFamily:"inherit",background:disabled?"#f3f4f6":W,color:D}} />
-      {suffix && <span style={{fontSize:12,color:GY,whiteSpace:"nowrap"}}>{suffix}</span>}
+    <div class="inp-group">
+      <label>Web Chat</label><div class="sub">Current platform · always active</div>
+      <div class="inp-row"><input type="number" id="web" value="75000" min="0" oninput="calc()"><span class="suf">/mo</span></div>
+    </div>
+
+    <div class="inp-group" id="appGroup">
+      <div class="toggle-row">
+        <div><label>Search Bar</label><div class="sub">Search bar conversations</div></div>
+        <div class="toggle" id="appToggle" onclick="toggleApp()" style="background:var(--P)"><div class="dot" style="left:18px"></div></div>
+      </div>
+      <div id="appInput" class="inp-row"><input type="number" id="appVol" value="13837" min="0" oninput="calc()"><span class="suf">/mo</span></div>
+    </div>
+
+    <div class="inp-group" id="emlGroup">
+      <div class="toggle-row">
+        <div><label>Email</label><div class="sub">Email automation conversations</div></div>
+        <div class="toggle" id="emlToggle" onclick="toggleEml()" style="background:var(--BD)"><div class="dot" style="left:2px"></div></div>
+      </div>
+      <div id="emlInput" class="inp-row" style="display:none"><input type="number" id="emlVol" value="0" min="0" oninput="calc()"><span class="suf">/mo</span></div>
+    </div>
+
+    <div class="inp-group" id="voiGroup">
+      <div class="toggle-row">
+        <div><label>Voice</label><div class="sub">Voice/phone automation</div></div>
+        <div class="toggle" id="voiToggle" onclick="toggleVoi()" style="background:var(--BD)"><div class="dot" style="left:2px"></div></div>
+      </div>
+      <div id="voiInput" class="inp-row" style="display:none"><input type="number" id="voiVol" value="0" min="0" oninput="calc()"><span class="suf">/mo</span></div>
+    </div>
+
+    <div class="total-box">
+      <div class="lbl">Total Monthly</div>
+      <div class="val" id="totalMo">88,837</div>
+      <div class="lbl"><span id="growthLabel">10</span>% YoY growth applied in model</div>
+    </div>
+
+    <!-- AR SECTION -->
+    <div style="font-size:12px;font-weight:700;color:var(--D);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">AI Performance — Automated Resolution Rate</div>
+
+    <div class="ar-section">
+      <span class="ar-label" style="color:var(--P);background:#6C2BD918">Messaging</span>
+      <div class="ar-sliders">
+        <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="77" id="m1" oninput="calc()" style="accent-color:var(--P)"><div class="pct" style="color:var(--P)" id="m1v">77%</div></div>
+        <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="84" id="m2" oninput="calc()" style="accent-color:var(--P)"><div class="pct" style="color:var(--P)" id="m2v">84%</div></div>
+        <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="93" id="m3" oninput="calc()" style="accent-color:var(--P)"><div class="pct" style="color:var(--P)" id="m3v">93%</div></div>
+      </div>
+    </div>
+
+    <div class="ar-section" id="emlAR" style="opacity:.5">
+      <span class="ar-label" style="color:var(--GR);background:#10b98118">Email</span>
+      <span style="font-size:9px;color:var(--GY);margin-left:4px">(enable Email channel above)</span>
+      <div class="ar-sliders">
+        <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="30" id="e1" oninput="calc()" style="accent-color:var(--GR)"><div class="pct" style="color:var(--GR)" id="e1v">30%</div></div>
+        <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="33" id="e2" oninput="calc()" style="accent-color:var(--GR)"><div class="pct" style="color:var(--GR)" id="e2v">33%</div></div>
+        <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="36" id="e3" oninput="calc()" style="accent-color:var(--GR)"><div class="pct" style="color:var(--GR)" id="e3v">36%</div></div>
+      </div>
+    </div>
+
+    <div class="ar-section" id="voiAR" style="opacity:.5">
+      <span class="ar-label" style="color:var(--AM);background:#f59e0b18">Voice</span>
+      <span style="font-size:9px;color:var(--GY);margin-left:4px">(enable Voice channel above)</span>
+      <div class="ar-sliders">
+        <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="25" id="v1" oninput="calc()" style="accent-color:var(--AM)"><div class="pct" style="color:var(--AM)" id="v1v">25%</div></div>
+        <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="30" id="v2" oninput="calc()" style="accent-color:var(--AM)"><div class="pct" style="color:var(--AM)" id="v2v">30%</div></div>
+        <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="35" id="v3" oninput="calc()" style="accent-color:var(--AM)"><div class="pct" style="color:var(--AM)" id="v3v">35%</div></div>
+      </div>
+    </div>
+
+    <!-- Cost Assumptions -->
+    <div class="divider">
+      <div class="section-title">Cost Assumptions</div>
+      <div class="inp-group"><label>Cost per human conversation</label><div class="inp-row"><span class="pre">$</span><input type="number" id="cpc" value="12" min="0" oninput="calc()"></div></div>
+      <div class="inp-group"><label>Volume growth rate (YoY)</label><div class="inp-row"><input type="number" id="growth" value="10" min="0" oninput="calc()"><span class="suf">%</span></div></div>
+      <div class="inp-group"><label>Vendor consolidation (Yr 1)</label><div class="inp-row"><span class="pre">$</span><input type="number" id="vendor" value="75000" min="0" oninput="calc()"></div></div>
     </div>
   </div>
-);
 
-const Slider = ({label, value, onChange, min=0, max=100}) => (
-  <div style={{marginBottom:10}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-      <span style={{fontSize:11,color:D}}>{label}</span>
-      <span style={{fontSize:13,fontWeight:700,color:G}}>{value}%</span>
+  <!-- RIGHT PANEL -->
+  <div class="right">
+
+    <!-- PRICING -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:16px">💰</span><span class="section-title" style="margin:0">Ada Pricing</span></div>
+
+      <div style="display:flex;gap:16px;margin-bottom:16px">
+        <div style="flex:1">
+          <div class="tier-header">Messaging Conversations Price by Volume</div>
+          <table class="tier-table"><thead><tr><th style="text-align:left">Tier Start</th><th style="text-align:left">Tier End</th><th style="text-align:right">Cost/Conv</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1,500,000</td><td style="text-align:right;font-weight:600;color:var(--P)">$0.32</td></tr>
+            <tr><td>1,500,001</td><td>2,000,000</td><td style="text-align:right;font-weight:600;color:var(--P)">$0.28</td></tr>
+            <tr><td>2,000,001+</td><td></td><td style="text-align:right;font-weight:600;color:var(--P)">$0.25</td></tr>
+          </tbody></table>
+          <div style="font-size:9px;color:var(--GY);margin-top:4px">Applies to: Web Chat, Search Bar, Email</div>
+        </div>
+        <div style="flex:1">
+          <div class="tier-header">Voice Conversations Price by Volume</div>
+          <table class="tier-table"><thead><tr><th style="text-align:left">Tier Start</th><th style="text-align:left">Tier End</th><th style="text-align:right">Cost/Conv</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>100,000</td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.95</td></tr>
+            <tr><td>100,001</td><td>200,000</td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.92</td></tr>
+            <tr><td>200,001</td><td>300,000</td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.89</td></tr>
+            <tr><td>300,001</td><td>500,000</td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.85</td></tr>
+            <tr><td>500,001</td><td>750,000</td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.80</td></tr>
+            <tr><td>750,001</td><td>1,000,000</td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.75</td></tr>
+            <tr><td>1,000,001+</td><td></td><td style="text-align:right;font-weight:600;color:var(--AM)">$0.70</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--D);margin-bottom:6px">Annual Volume & Cost by Channel</div>
+      <table><thead><tr><th>Channel</th><th>Yr 1 Vol</th><th>Yr 1 Cost</th><th>Yr 2 Vol</th><th>Yr 2 Cost</th><th>Yr 3 Vol</th><th>Yr 3 Cost</th></tr></thead>
+      <tbody id="pricingBody"></tbody></table>
+
+      <div class="eff-rates" id="effRates"></div>
     </div>
-    <input type="range" min={min} max={max} value={value} onChange={e=>onChange(Number(e.target.value))}
-      style={{width:"100%",accentColor:G,marginTop:2}} />
+
+    <!-- CHART -->
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:16px">📊</span><span style="font-size:13px;font-weight:700;color:var(--D)">Savings vs. Ada Investment</span></div>
+      <div style="font-size:10px;color:var(--GY);margin-bottom:10px">Annual breakdown by category</div>
+      <div id="chart" style="display:flex;align-items:flex-end;justify-content:center;gap:40px;height:210px;padding-bottom:32px;position:relative">
+        <div style="position:absolute;bottom:28px;left:0;right:0;border-top:1px dashed var(--BD)"></div>
+      </div>
+      <div id="chartLabels" style="display:flex;justify-content:center;gap:80px;font-size:11px;font-weight:600;color:var(--D)"></div>
+      <div class="chart-legend"><span class="sav">Gross Savings</span><span class="ada">Ada Cost</span></div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-row" id="kpis"></div>
+
+    <!-- VOLUME TABLE -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--D)">Annual Conversation Volume</div>
+      <div style="font-size:9px;color:var(--GY);margin-bottom:8px" id="volSub"></div>
+      <table><thead><tr><th>Channel</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>3-Year Total</th></tr></thead>
+      <tbody id="volBody"></tbody></table>
+    </div>
+
+    <!-- FINANCIAL TABLE -->
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--D)">3-Year Financial Model</div>
+      <div style="font-size:9px;color:var(--GY);margin-bottom:8px">All values in USD</div>
+      <table><thead><tr><th>Line Item</th><th>Year 1</th><th>Year 2</th><th>Year 3</th></tr></thead>
+      <tbody id="finBody"></tbody></table>
+    </div>
   </div>
-);
+</div>
 
-const KPI = ({label, value, sub}) => (
-  <div style={{flex:1,background:GBG,borderRadius:10,padding:"16px 14px",textAlign:"center",border:`1px solid ${G}22`}}>
-    <div style={{fontSize:22,fontWeight:800,color:G}}>{value}</div>
-    <div style={{fontSize:11,fontWeight:600,color:D,marginTop:2}}>{label}</div>
-    {sub && <div style={{fontSize:9,color:GY,marginTop:2}}>{sub}</div>}
-  </div>
-);
+<script>
+var appOn=true, emlOn=false, voiOn=false;
 
-export default function App() {
-  const [web, setWeb] = useState(75000);
-  const [app, setApp] = useState(13837);
-  const [email, setEmail] = useState(0);
-  const [msgAR1, setMsgAR1] = useState(77);
-  const [msgAR2, setMsgAR2] = useState(84);
-  const [msgAR3, setMsgAR3] = useState(93);
-  const [emAR1, setEmAR1] = useState(30);
-  const [emAR2, setEmAR2] = useState(33);
-  const [emAR3, setEmAR3] = useState(36);
-  const [cpc, setCpc] = useState(12);
-  const [growth, setGrowth] = useState(10);
-  const [vendorSave, setVendorSave] = useState(75000);
-  const [adaFee, setAdaFee] = useState(450000);
-  const [included, setIncluded] = useState(1200000);
-  const [ovRate, setOvRate] = useState(0.45);
-  const [ovBlock, setOvBlock] = useState(1000);
+function toggleApp(){
+  appOn=!appOn;
+  document.getElementById('appToggle').style.background=appOn?'var(--P)':'var(--BD)';
+  document.getElementById('appToggle').querySelector('.dot').style.left=appOn?'18px':'2px';
+  document.getElementById('appInput').style.display=appOn?'flex':'none';
+  if(!appOn)document.getElementById('appVol').value=0;else document.getElementById('appVol').value=13837;
+  calc();
+}
+function toggleEml(){
+  emlOn=!emlOn;
+  document.getElementById('emlToggle').style.background=emlOn?'var(--P)':'var(--BD)';
+  document.getElementById('emlToggle').querySelector('.dot').style.left=emlOn?'18px':'2px';
+  document.getElementById('emlInput').style.display=emlOn?'flex':'none';
+  document.getElementById('emlAR').style.opacity=emlOn?1:.5;
+  if(!emlOn)document.getElementById('emlVol').value=0;else document.getElementById('emlVol').value=10000;
+  calc();
+}
+function toggleVoi(){
+  voiOn=!voiOn;
+  document.getElementById('voiToggle').style.background=voiOn?'var(--P)':'var(--BD)';
+  document.getElementById('voiToggle').querySelector('.dot').style.left=voiOn?'18px':'2px';
+  document.getElementById('voiInput').style.display=voiOn?'flex':'none';
+  document.getElementById('voiAR').style.opacity=voiOn?1:.5;
+  if(!voiOn)document.getElementById('voiVol').value=0;else document.getElementById('voiVol').value=5000;
+  calc();
+}
 
-  const totalMo = web + app + email;
-  const msgMo = web + app;
-  const emMo = email;
+function gv(id){return Number(document.getElementById(id).value)||0}
+function fmt(v){return'$'+Math.round(v).toLocaleString()}
+function fK(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':v.toString()}
 
-  // Yearly volumes with growth
-  const g = growth / 100;
-  const msgY = [msgMo*12, Math.round(msgMo*12*(1+g)), Math.round(msgMo*12*(1+g)**2)];
-  const emY = [emMo*12, Math.round(emMo*12*(1+g)), Math.round(emMo*12*(1+g)**2)];
-  const totalY = msgY.map((m,i) => m + emY[i]);
+function calcMsgCost(v){
+  if(v<=0)return 0;
+  if(v<=1500000)return v*.32;
+  if(v<=2000000)return 1500000*.32+(v-1500000)*.28;
+  return 1500000*.32+500000*.28+(v-2000000)*.25;
+}
+function calcVoiceCost(v){
+  if(v<=0)return 0;
+  var tiers=[[100000,.95],[200000,.92],[300000,.89],[500000,.85],[750000,.80],[1000000,.75],[Infinity,.70]];
+  var cost=0,rem=v,prev=0;
+  for(var i=0;i<tiers.length;i++){
+    var chunk=Math.min(rem,tiers[i][0]-prev);
+    if(chunk<=0)break;
+    cost+=chunk*tiers[i][1];rem-=chunk;prev=tiers[i][0];
+    if(rem<=0)break;
+  }
+  return cost;
+}
 
-  // Resolved
-  const msgAR = [msgAR1/100, msgAR2/100, msgAR3/100];
-  const emAR = [emAR1/100, emAR2/100, emAR3/100];
-  const resolvedY = msgY.map((m,i) => Math.round(m * msgAR[i] + emY[i] * emAR[i]));
-  const humanY = totalY.map((t,i) => t - resolvedY[i]);
+function calc(){
+  var web=gv('web'),app=gv('appVol'),eml=gv('emlVol'),voi=gv('voiVol');
+  var m1=gv('m1'),m2=gv('m2'),m3=gv('m3'),e1=gv('e1'),e2=gv('e2'),e3=gv('e3'),v1=gv('v1'),v2=gv('v2'),v3=gv('v3');
+  var cpc=gv('cpc'),gr=gv('growth')/100,vs=gv('vendor');
 
-  // Savings
-  const savingsY = resolvedY.map(r => r * cpc);
-  const vendorY = [vendorSave, 0, 0];
-  const grossY = savingsY.map((s,i) => s + vendorY[i]);
-
-  // Ada cost
-  const adaCostY = totalY.map(t => {
-    if (t <= included) return adaFee;
-    const over = t - included;
-    const blocks = Math.ceil(over / ovBlock);
-    return adaFee + blocks * ovBlock * ovRate;
+  // Update AR labels
+  ['m1','m2','m3','e1','e2','e3','v1','v2','v3'].forEach(function(id){
+    document.getElementById(id+'v').textContent=gv(id)+'%';
   });
 
-  const netY = grossY.map((g,i) => g - adaCostY[i]);
-  const total3Savings = grossY.reduce((a,b)=>a+b,0);
-  const total3Net = netY.reduce((a,b)=>a+b,0);
-  const total3Ada = adaCostY.reduce((a,b)=>a+b,0);
-  const roiMult = total3Ada > 0 ? total3Net / total3Ada : 0;
-  const fte = Math.round(humanY[2] > 0 ? resolvedY[2] / (humanY[2] / (totalY[2] / resolvedY[2])) / 2000 : resolvedY[2] / 2000);
+  var tMo=web+app+eml+voi;
+  document.getElementById('totalMo').textContent=tMo.toLocaleString();
+  document.getElementById('growthLabel').textContent=Math.round(gr*100);
+  document.getElementById('volSub').textContent=Math.round(gr*100)+'% YoY growth applied to Year 1 inputs';
 
-  // Chart bar heights
-  const maxBar = Math.max(...grossY, ...adaCostY, 1);
-  const barH = v => Math.max(4, (v / maxBar) * 160);
+  var mMo=web+app,eMo=eml,vMo=voi;
+  var mY=[mMo*12,Math.round(mMo*12*(1+gr)),Math.round(mMo*12*Math.pow(1+gr,2))];
+  var eY=[eMo*12,Math.round(eMo*12*(1+gr)),Math.round(eMo*12*Math.pow(1+gr,2))];
+  var vY=[vMo*12,Math.round(vMo*12*(1+gr)),Math.round(vMo*12*Math.pow(1+gr,2))];
+  var tY=[mY[0]+eY[0]+vY[0],mY[1]+eY[1]+vY[1],mY[2]+eY[2]+vY[2]];
 
-  return (
-    <div style={{fontFamily:"'Inter',-apple-system,sans-serif",background:"#f0fdf4",minHeight:"100vh"}}>
-      {/* Header */}
-      <div style={{background:`linear-gradient(135deg,${GD},${G})`,padding:"20px 32px",display:"flex",alignItems:"center",gap:16}}>
-        <div style={{background:W,borderRadius:8,padding:"6px 14px",fontWeight:800,color:G,fontSize:16}}>ada</div>
-        <div>
-          <div style={{fontSize:20,fontWeight:700,color:W}}>ROI Scenario Modeller</div>
-          <div style={{fontSize:12,color:"#a7f3d0"}}>Template × Ada AI Agent</div>
-        </div>
-        <div style={{marginLeft:"auto",background:"rgba(255,255,255,0.15)",borderRadius:8,padding:"6px 16px",fontSize:12,color:W,fontWeight:600}}>Interactive Model</div>
-      </div>
+  var mAR=[m1/100,m2/100,m3/100],eAR=[e1/100,e2/100,e3/100],vAR=[v1/100,v2/100,v3/100];
+  var resY=[],humY=[],savY=[],venY=[vs,0,0],groY=[],netY=[];
+  for(var i=0;i<3;i++){
+    resY[i]=Math.round(mY[i]*mAR[i]+eY[i]*eAR[i]+vY[i]*vAR[i]);
+    humY[i]=tY[i]-resY[i];
+    savY[i]=resY[i]*cpc;
+    groY[i]=savY[i]+venY[i];
+  }
 
-      <div style={{display:"flex",gap:0,minHeight:"calc(100vh - 72px)"}}>
-        {/* LEFT PANEL */}
-        <div style={{width:320,background:W,borderRight:`1px solid ${BD}`,padding:20,overflowY:"auto",flexShrink:0}}>
-          <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:12}}>Conversation Volume (Monthly)</div>
-          <Input label="Web Chat" sub="Current platform · always active" value={web} onChange={setWeb} suffix="/mo" />
-          <Input label="In-App Chat" sub="Mobile app conversations" value={app} onChange={setApp} suffix="/mo" />
-          <Input label="Email" sub="Email automation conversations" value={email} onChange={setEmail} suffix="/mo" />
-          <div style={{background:GBG,borderRadius:8,padding:"10px 12px",marginBottom:16}}>
-            <div style={{fontSize:11,color:GY}}>Total Monthly</div>
-            <div style={{fontSize:18,fontWeight:800,color:G}}>{totalMo.toLocaleString()}</div>
-            <div style={{fontSize:9,color:GY}}>{growth}% YoY growth applied in model</div>
-          </div>
+  // Pricing
+  var wAY=[web*12,Math.round(web*12*(1+gr)),Math.round(web*12*Math.pow(1+gr,2))];
+  var aAY=[app*12,Math.round(app*12*(1+gr)),Math.round(app*12*Math.pow(1+gr,2))];
+  var eAY=[eml*12,Math.round(eml*12*(1+gr)),Math.round(eml*12*Math.pow(1+gr,2))];
+  var vAY=[voi*12,Math.round(voi*12*(1+gr)),Math.round(voi*12*Math.pow(1+gr,2))];
+  var msgAY=[wAY[0]+aAY[0]+eAY[0],wAY[1]+aAY[1]+eAY[1],wAY[2]+aAY[2]+eAY[2]];
+  var msgCY=msgAY.map(calcMsgCost);
+  var voiCY=vAY.map(calcVoiceCost);
+  var adaY=[msgCY[0]+voiCY[0],msgCY[1]+voiCY[1],msgCY[2]+voiCY[2]];
 
-          <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:8}}>AI Performance — Automated Resolution Rate</div>
-          <div style={{fontSize:12,fontWeight:600,color:D,marginBottom:6}}>Messaging</div>
-          <Slider label="Year 1" value={msgAR1} onChange={setMsgAR1} />
-          <Slider label="Year 2" value={msgAR2} onChange={setMsgAR2} />
-          <Slider label="Year 3" value={msgAR3} onChange={setMsgAR3} />
+  for(var i=0;i<3;i++)netY[i]=groY[i]-adaY[i];
+  var t3S=groY[0]+groY[1]+groY[2],t3N=netY[0]+netY[1]+netY[2],t3A=adaY[0]+adaY[1]+adaY[2];
+  var roi=t3A>0?t3N/t3A:0;
+  var fte=Math.round(resY[2]/2000);
 
-          <div style={{fontSize:12,fontWeight:600,color:D,marginBottom:6,marginTop:10}}>Email {email===0 && <span style={{fontSize:10,color:GY}}>(enable Email above)</span>}</div>
-          <Slider label="Year 1" value={emAR1} onChange={setEmAR1} />
-          <Slider label="Year 2" value={emAR2} onChange={setEmAR2} />
-          <Slider label="Year 3" value={emAR3} onChange={setEmAR3} />
+  // Pricing table
+  var pb='';
+  pb+='<tr style="background:var(--W)"><td style="font-weight:600">Web Chat</td>';
+  for(var i=0;i<3;i++)pb+='<td>'+wAY[i].toLocaleString()+'</td><td style="color:var(--GY)"></td>';
+  pb+='</tr>';
+  if(app>0){pb+='<tr style="background:var(--CR)"><td style="font-weight:600">Search Bar</td>';for(var i=0;i<3;i++)pb+='<td>'+aAY[i].toLocaleString()+'</td><td style="color:var(--GY)"></td>';pb+='</tr>';}
+  if(eml>0){pb+='<tr style="background:var(--W)"><td style="font-weight:600">Email</td>';for(var i=0;i<3;i++)pb+='<td>'+eAY[i].toLocaleString()+'</td><td style="color:var(--GY)"></td>';pb+='</tr>';}
+  pb+='<tr style="background:var(--PBG)"><td style="font-weight:700;color:var(--P)">Messaging Total</td>';
+  for(var i=0;i<3;i++)pb+='<td style="font-weight:700">'+msgAY[i].toLocaleString()+'</td><td style="font-weight:700;color:var(--P)">'+fmt(msgCY[i])+'</td>';
+  pb+='</tr>';
+  if(voi>0){pb+='<tr style="background:#fffbeb"><td style="font-weight:700;color:#b45309">Voice</td>';for(var i=0;i<3;i++)pb+='<td style="font-weight:700">'+vAY[i].toLocaleString()+'</td><td style="font-weight:700;color:#b45309">'+fmt(voiCY[i])+'</td>';pb+='</tr>';}
+  pb+='<tr style="background:#111827"><td style="font-weight:800;color:var(--W)">Total Annual Cost</td>';
+  for(var i=0;i<3;i++)pb+='<td style="font-weight:700;color:#d1d5db">'+tY[i].toLocaleString()+'</td><td style="font-weight:800;color:var(--W)">'+fmt(adaY[i])+'</td>';
+  pb+='</tr>';
+  document.getElementById('pricingBody').innerHTML=pb;
 
-          <div style={{borderTop:`1px solid ${BD}`,marginTop:16,paddingTop:16}}>
-            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:12}}>Cost Assumptions</div>
-            <Input label="Cost per human conversation" value={cpc} onChange={setCpc} prefix="$" />
-            <Input label="Volume growth rate (YoY)" value={growth} onChange={setGrowth} suffix="%" />
-            <Input label="Vendor consolidation (Yr 1)" value={vendorSave} onChange={setVendorSave} prefix="$" />
-          </div>
+  var er='';for(var i=0;i<3;i++){var rate=tY[i]>0?adaY[i]/tY[i]:0;er+='<div class="eff-rate"><div style="font-size:9px;color:var(--GY)">Year '+(i+1)+' Eff. Rate</div><div class="val">$'+rate.toFixed(2)+'</div><div style="font-size:8px;color:var(--GY)">per conversation</div></div>';}
+  document.getElementById('effRates').innerHTML=er;
 
-          <div style={{borderTop:`1px solid ${BD}`,marginTop:16,paddingTop:16}}>
-            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:12}}>Ada Contract Pricing</div>
-            <Input label="Annual contract fee" value={adaFee} onChange={setAdaFee} prefix="$" />
-            <Input label="Included conversations/yr" value={included} onChange={setIncluded} />
-            <Input label="Overage rate (per convo)" value={ovRate} onChange={setOvRate} prefix="$" step={0.01} />
-            <Input label="Overage block size" value={ovBlock} onChange={setOvBlock} />
-          </div>
-        </div>
+  // Chart
+  var mx=Math.max(groY[0],groY[1],groY[2],adaY[0],adaY[1],adaY[2],1);
+  var bH=function(v){return Math.max(4,(v/mx)*170);};
+  var ch='<div style="position:absolute;bottom:28px;left:0;right:0;border-top:1px dashed var(--BD)"></div>';
+  var cl='';
+  for(var i=0;i<3;i++){
+    ch+='<div style="text-align:center"><div style="display:flex;gap:6px;align-items:flex-end;justify-content:center">';
+    ch+='<div style="display:flex;flex-direction:column;align-items:center"><div style="font-size:9px;color:var(--GR);font-weight:700;margin-bottom:2px">'+fK(groY[i])+'</div><div style="width:40px;height:'+bH(groY[i])+'px;background:linear-gradient(180deg,var(--PL),var(--P));border-radius:6px 6px 0 0"></div></div>';
+    ch+='<div style="display:flex;flex-direction:column;align-items:center"><div style="font-size:9px;color:var(--RD);font-weight:700;margin-bottom:2px">'+fK(adaY[i])+'</div><div style="width:40px;height:'+bH(adaY[i])+'px;background:linear-gradient(180deg,#fca5a5,#ef4444);border-radius:6px 6px 0 0"></div></div>';
+    ch+='</div><div style="font-size:11px;font-weight:600;color:var(--D);margin-top:6px">Year '+(i+1)+'</div></div>';
+  }
+  document.getElementById('chart').innerHTML=ch;
 
-        {/* RIGHT PANEL */}
-        <div style={{flex:1,padding:24,overflowY:"auto"}}>
-          {/* Chart */}
-          <div style={{background:W,borderRadius:12,padding:20,border:`1px solid ${BD}`,marginBottom:20}}>
-            <div style={{fontSize:12,color:GY,marginBottom:8}}>Adjust channels and volumes in the left panel · {growth}% YoY growth applied</div>
-            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:32,height:200,paddingBottom:30,position:"relative"}}>
-              {/* Baseline */}
-              <div style={{position:"absolute",bottom:28,left:0,right:0,borderTop:`1px dashed ${BD}`}}></div>
-              {["Year 1","Year 2","Year 3"].map((yr,i) => (
-                <div key={i} style={{display:"flex",gap:8,alignItems:"flex-end",textAlign:"center"}}>
-                  <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
-                    <div style={{fontSize:9,color:G,fontWeight:600,marginBottom:2}}>{fmtK(grossY[i])}</div>
-                    <div style={{width:36,height:barH(grossY[i]),background:`linear-gradient(180deg,${GL},${G})`,borderRadius:"6px 6px 0 0"}}></div>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}>
-                    <div style={{fontSize:9,color:"#dc2626",fontWeight:600,marginBottom:2}}>{fmtK(adaCostY[i])}</div>
-                    <div style={{width:36,height:barH(adaCostY[i]),background:"linear-gradient(180deg,#fca5a5,#ef4444)",borderRadius:"6px 6px 0 0"}}></div>
-                  </div>
-                  <div style={{position:"absolute",bottom:6,fontSize:11,fontWeight:600,color:D}}></div>
-                </div>
-              ))}
-            </div>
-            <div style={{display:"flex",justifyContent:"center",gap:80,fontSize:11,fontWeight:600,color:D}}>
-              <span>Year 1</span><span>Year 2</span><span>Year 3</span>
-            </div>
-            <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:8,fontSize:10,color:GY}}>
-              <span><span style={{display:"inline-block",width:10,height:10,background:G,borderRadius:2,marginRight:4,verticalAlign:"middle"}}></span>Savings</span>
-              <span><span style={{display:"inline-block",width:10,height:10,background:"#ef4444",borderRadius:2,marginRight:4,verticalAlign:"middle"}}></span>Ada Cost</span>
-            </div>
-          </div>
+  // KPIs
+  var kh='';
+  [[fmt(t3S),'3-Year Total Savings','Before Ada cost'],[fmt(t3N),'3-Year Net ROI','After Ada cost'],[roi.toFixed(1)+'x','Year 3 ROI Multiple','Return per $1 invested'],[fte,'FTEs Freed (Year 3)','Agent headcount equivalent']].forEach(function(k){
+    kh+='<div class="kpi"><div class="val">'+k[0]+'</div><div class="lbl">'+k[1]+'</div><div class="sub">'+k[2]+'</div></div>';
+  });
+  document.getElementById('kpis').innerHTML=kh;
 
-          {/* KPIs */}
-          <div style={{display:"flex",gap:12,marginBottom:20}}>
-            <KPI label="3-Year Total Savings" value={fmt(total3Savings)} sub="Before Ada cost" />
-            <KPI label="3-Year Net ROI" value={fmt(total3Net)} sub="After Ada cost" />
-            <KPI label="Year 3 ROI Multiple" value={roiMult.toFixed(1)+"x"} sub="Return per $1 invested" />
-            <KPI label="FTEs Freed (Year 3)" value={fte} sub="Agent headcount equivalent" />
-          </div>
+  // Volume table
+  var vb='';
+  vb+='<tr style="background:var(--W)"><td style="font-weight:600">Messaging</td><td>'+mY[0].toLocaleString()+'</td><td>'+mY[1].toLocaleString()+'</td><td>'+mY[2].toLocaleString()+'</td><td>'+(mY[0]+mY[1]+mY[2]).toLocaleString()+'</td></tr>';
+  if(eml>0)vb+='<tr style="background:var(--CR)"><td style="font-weight:600">Email</td><td>'+eY[0].toLocaleString()+'</td><td>'+eY[1].toLocaleString()+'</td><td>'+eY[2].toLocaleString()+'</td><td>'+(eY[0]+eY[1]+eY[2]).toLocaleString()+'</td></tr>';
+  if(voi>0)vb+='<tr style="background:var(--W)"><td style="font-weight:600">Voice</td><td>'+vY[0].toLocaleString()+'</td><td>'+vY[1].toLocaleString()+'</td><td>'+vY[2].toLocaleString()+'</td><td>'+(vY[0]+vY[1]+vY[2]).toLocaleString()+'</td></tr>';
+  vb+='<tr style="background:var(--PBG)"><td style="font-weight:700;color:var(--P)">Total</td><td style="font-weight:700;color:var(--P)">'+tY[0].toLocaleString()+'</td><td style="font-weight:700;color:var(--P)">'+tY[1].toLocaleString()+'</td><td style="font-weight:700;color:var(--P)">'+tY[2].toLocaleString()+'</td><td style="font-weight:700;color:var(--P)">'+(tY[0]+tY[1]+tY[2]).toLocaleString()+'</td></tr>';
+  document.getElementById('volBody').innerHTML=vb;
 
-          {/* Volume Table */}
-          <div style={{background:W,borderRadius:12,padding:20,border:`1px solid ${BD}`,marginBottom:20}}>
-            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:4}}>Annual Conversation Volume</div>
-            <div style={{fontSize:10,color:GY,marginBottom:10}}>{growth}% YoY growth applied to Year 1 inputs</div>
-            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
-              <thead>
-                <tr style={{background:G}}>
-                  {["Channel","Year 1","Year 2","Year 3","3-Year Total"].map(h=>(
-                    <th key={h} style={{padding:"8px 10px",textAlign:h==="Channel"?"left":"right",color:W,fontWeight:600}}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ["Messaging",msgY[0],msgY[1],msgY[2],msgY.reduce((a,b)=>a+b,0)],
-                  ...(email>0?[["Email",emY[0],emY[1],emY[2],emY.reduce((a,b)=>a+b,0)]]:[]),
-                  ["Total",totalY[0],totalY[1],totalY[2],totalY.reduce((a,b)=>a+b,0)]
-                ].map((r,i,a)=>(
-                  <tr key={i} style={{background:i===a.length-1?GBG:i%2===0?W:CR,fontWeight:i===a.length-1?700:400}}>
-                    <td style={{padding:"8px 10px",borderBottom:`1px solid ${BD}`}}>{r[0]}</td>
-                    {[1,2,3,4].map(j=><td key={j} style={{padding:"8px 10px",textAlign:"right",borderBottom:`1px solid ${BD}`,color:i===a.length-1?G:D}}>{r[j].toLocaleString()}</td>)}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Financial Model Table */}
-          <div style={{background:W,borderRadius:12,padding:20,border:`1px solid ${BD}`,marginBottom:20}}>
-            <div style={{fontSize:14,fontWeight:700,color:D,marginBottom:4}}>3-Year Financial Model</div>
-            <div style={{fontSize:10,color:GY,marginBottom:10}}>All values in USD</div>
-            <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
-              <thead>
-                <tr style={{background:G}}>
-                  {["Line Item","Year 1","Year 2","Year 3"].map(h=>(
-                    <th key={h} style={{padding:"8px 10px",textAlign:h==="Line Item"?"left":"right",color:W,fontWeight:600}}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {l:"Total Conversations",v:totalY,b:false,c:D},
-                  {l:"AI Resolved",v:resolvedY,b:false,c:G},
-                  {l:"Human Handled",v:humanY,b:false,c:D},
-                  {l:"Resolution Savings",v:savingsY,b:false,c:D,f:true},
-                  {l:"Vendor Consolidation",v:vendorY,b:false,c:D,f:true},
-                  {l:"Gross Savings",v:grossY,b:true,c:G,f:true},
-                  {l:"Ada Cost",v:adaCostY,b:false,c:"#dc2626",f:true,bg:"#fef2f2"},
-                  {l:"Net Savings",v:netY,b:true,c:G,f:true,bg:GBG},
-                ].map((r,i)=>(
-                  <tr key={i} style={{background:r.bg||(i%2===0?W:CR)}}>
-                    <td style={{padding:"8px 10px",fontWeight:r.b?700:400,borderBottom:`1px solid ${BD}`,color:r.c}}>{r.l}</td>
-                    {r.v.map((val,j)=>(
-                      <td key={j} style={{padding:"8px 10px",textAlign:"right",fontWeight:r.b?700:400,borderBottom:`1px solid ${BD}`,color:r.c}}>
-                        {r.f?fmt(val):val.toLocaleString()}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Financial table
+  var fb='',rows=[
+    ['Total Conversations',tY,false,false],['AI Resolved',resY,false,false],['Human Handled',humY,false,false],
+    ['Resolution Savings',savY,false,true],['Vendor Consolidation',venY,false,true],
+    ['Gross Savings',groY,true,true],['Ada Cost',adaY,'danger',true],['Net Savings',netY,true,true]
+  ];
+  rows.forEach(function(r,idx){
+    var hl=r[2],isF=r[3],bg='';
+    if(hl==='danger')bg='background:#fef2f2';
+    else if(hl)bg='background:var(--PBG)';
+    else bg='background:'+(idx%2===0?'var(--W)':'var(--CR)');
+    var tc=hl==='danger'?'color:var(--RD)':hl?'color:var(--P)':'color:var(--D)';
+    var fw=hl?'font-weight:700':'font-weight:400';
+    fb+='<tr style="'+bg+'"><td style="'+fw+';'+tc+'">'+r[0]+'</td>';
+    for(var i=0;i<3;i++){
+      var val=isF?fmt(r[1][i]):r[1][i].toLocaleString();
+      fb+='<td style="'+fw+';'+tc+'">'+val+'</td>';
+    }
+    fb+='</tr>';
+  });
+  document.getElementById('finBody').innerHTML=fb;
 }
+
+calc();
+</script>
+</body>
+</html>
