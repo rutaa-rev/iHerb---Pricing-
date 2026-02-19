@@ -125,6 +125,16 @@ table tbody td:not(:first-child){text-align:right}
       </div>
     </div>
 
+    <div class="ar-section" id="sbAR" style="opacity:.5">
+      <span class="ar-label" style="color:#3B82F6;background:#3B82F618">Search Bar</span>
+      <span style="font-size:9px;color:var(--GY);margin-left:4px">(enable Search Bar channel above)</span>
+      <div class="ar-sliders">
+        <div><div class="yr">Year 1</div><input type="range" min="0" max="100" value="50" id="s1" oninput="calc()" style="accent-color:#3B82F6"><div class="pct" style="color:#3B82F6" id="s1v">50%</div></div>
+        <div><div class="yr">Year 2</div><input type="range" min="0" max="100" value="60" id="s2" oninput="calc()" style="accent-color:#3B82F6"><div class="pct" style="color:#3B82F6" id="s2v">60%</div></div>
+        <div><div class="yr">Year 3</div><input type="range" min="0" max="100" value="70" id="s3" oninput="calc()" style="accent-color:#3B82F6"><div class="pct" style="color:#3B82F6" id="s3v">70%</div></div>
+      </div>
+    </div>
+
     <div class="ar-section" id="emlAR" style="opacity:.5">
       <span class="ar-label" style="color:var(--GR);background:#10b98118">Email</span>
       <span style="font-size:9px;color:var(--GY);margin-left:4px">(enable Email channel above)</span>
@@ -187,7 +197,7 @@ table tbody td:not(:first-child){text-align:right}
         </div>
       </div>
 
-      <div style="font-size:12px;font-weight:700;color:var(--D);margin-bottom:6px">Annual Volume & Cost by Channel</div>
+      <div style="font-size:12px;font-weight:700;color:var(--D);margin-bottom:6px">Annual Volume &amp; Cost by Channel</div>
       <table><thead><tr><th>Channel</th><th>Yr 1 Vol</th><th>Yr 1 Cost</th><th>Yr 2 Vol</th><th>Yr 2 Cost</th><th>Yr 3 Vol</th><th>Yr 3 Cost</th></tr></thead>
       <tbody id="pricingBody"></tbody></table>
 
@@ -234,6 +244,7 @@ function toggleApp(){
   document.getElementById('appToggle').style.background=appOn?'var(--P)':'var(--BD)';
   document.getElementById('appToggle').querySelector('.dot').style.left=appOn?'18px':'2px';
   document.getElementById('appInput').style.display=appOn?'flex':'none';
+  if(appOn)document.getElementById('sbAR').style.opacity=1;else document.getElementById('sbAR').style.opacity=.5;
   if(!appOn)document.getElementById('appVol').value=0;else document.getElementById('appVol').value=13837;
   calc();
 }
@@ -281,11 +292,10 @@ function calcVoiceCost(v){
 
 function calc(){
   var web=gv('web'),app=gv('appVol'),eml=gv('emlVol'),voi=gv('voiVol');
-  var m1=gv('m1'),m2=gv('m2'),m3=gv('m3'),e1=gv('e1'),e2=gv('e2'),e3=gv('e3'),v1=gv('v1'),v2=gv('v2'),v3=gv('v3');
+  var m1=gv('m1'),m2=gv('m2'),m3=gv('m3'),s1=gv('s1'),s2=gv('s2'),s3=gv('s3'),e1=gv('e1'),e2=gv('e2'),e3=gv('e3'),v1=gv('v1'),v2=gv('v2'),v3=gv('v3');
   var cpc=gv('cpc'),gr=gv('growth')/100,vs=gv('vendor');
 
-  // Update AR labels
-  ['m1','m2','m3','e1','e2','e3','v1','v2','v3'].forEach(function(id){
+  ['m1','m2','m3','s1','s2','s3','e1','e2','e3','v1','v2','v3'].forEach(function(id){
     document.getElementById(id+'v').textContent=gv(id)+'%';
   });
 
@@ -294,22 +304,22 @@ function calc(){
   document.getElementById('growthLabel').textContent=Math.round(gr*100);
   document.getElementById('volSub').textContent=Math.round(gr*100)+'% YoY growth applied to Year 1 inputs';
 
-  var mMo=web+app,eMo=eml,vMo=voi;
+  var mMo=web,sMo=app,eMo=eml,vMo=voi;
   var mY=[mMo*12,Math.round(mMo*12*(1+gr)),Math.round(mMo*12*Math.pow(1+gr,2))];
+  var sY=[sMo*12,Math.round(sMo*12*(1+gr)),Math.round(sMo*12*Math.pow(1+gr,2))];
   var eY=[eMo*12,Math.round(eMo*12*(1+gr)),Math.round(eMo*12*Math.pow(1+gr,2))];
   var vY=[vMo*12,Math.round(vMo*12*(1+gr)),Math.round(vMo*12*Math.pow(1+gr,2))];
-  var tY=[mY[0]+eY[0]+vY[0],mY[1]+eY[1]+vY[1],mY[2]+eY[2]+vY[2]];
+  var tY=[mY[0]+sY[0]+eY[0]+vY[0],mY[1]+sY[1]+eY[1]+vY[1],mY[2]+sY[2]+eY[2]+vY[2]];
 
-  var mAR=[m1/100,m2/100,m3/100],eAR=[e1/100,e2/100,e3/100],vAR=[v1/100,v2/100,v3/100];
+  var mAR=[m1/100,m2/100,m3/100],sAR=[s1/100,s2/100,s3/100],eAR=[e1/100,e2/100,e3/100],vAR=[v1/100,v2/100,v3/100];
   var resY=[],humY=[],savY=[],venY=[vs,0,0],groY=[],netY=[];
   for(var i=0;i<3;i++){
-    resY[i]=Math.round(mY[i]*mAR[i]+eY[i]*eAR[i]+vY[i]*vAR[i]);
+    resY[i]=Math.round(mY[i]*mAR[i]+sY[i]*sAR[i]+eY[i]*eAR[i]+vY[i]*vAR[i]);
     humY[i]=tY[i]-resY[i];
     savY[i]=resY[i]*cpc;
     groY[i]=savY[i]+venY[i];
   }
 
-  // Pricing
   var wAY=[web*12,Math.round(web*12*(1+gr)),Math.round(web*12*Math.pow(1+gr,2))];
   var aAY=[app*12,Math.round(app*12*(1+gr)),Math.round(app*12*Math.pow(1+gr,2))];
   var eAY=[eml*12,Math.round(eml*12*(1+gr)),Math.round(eml*12*Math.pow(1+gr,2))];
@@ -347,7 +357,6 @@ function calc(){
   var mx=Math.max(groY[0],groY[1],groY[2],adaY[0],adaY[1],adaY[2],1);
   var bH=function(v){return Math.max(4,(v/mx)*170);};
   var ch='<div style="position:absolute;bottom:28px;left:0;right:0;border-top:1px dashed var(--BD)"></div>';
-  var cl='';
   for(var i=0;i<3;i++){
     ch+='<div style="text-align:center"><div style="display:flex;gap:6px;align-items:flex-end;justify-content:center">';
     ch+='<div style="display:flex;flex-direction:column;align-items:center"><div style="font-size:9px;color:var(--GR);font-weight:700;margin-bottom:2px">'+fK(groY[i])+'</div><div style="width:40px;height:'+bH(groY[i])+'px;background:linear-gradient(180deg,var(--PL),var(--P));border-radius:6px 6px 0 0"></div></div>';
