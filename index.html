@@ -91,15 +91,15 @@ table tbody td:not(:first-child){text-align:right}
 
   <div class="inp-group">
     <label>Web Chat</label><div class="sub">Current platform - always active</div>
-    <div class="inp-row"><input type="number" id="web" value="75000" min="0" oninput="calc()"><span class="suf">/mo</span></div>
+          <div class="inp-row"><input type="number" id="web" value="140000" min="0" oninput="calc()"><span class="suf">/mo</span></div>
   </div>
 
   <div class="inp-group">
     <div class="toggle-row">
       <div><label>Search Bar</label><div class="sub">Search bar conversations</div></div>
-      <div class="toggle" id="appToggle" onclick="toggleCh('app')" style="background:var(--P)"><div class="dot" style="left:18px"></div></div>
+      <div class="toggle" id="appToggle" onclick="toggleCh('app')" style="background:var(--BD)"><div class="dot" style="left:2px"></div></div>
     </div>
-    <div id="appInput" class="inp-row"><input type="number" id="appVol" value="13837" min="0" oninput="calc()"><span class="suf">/mo</span></div>
+    <div id="appInput" class="inp-row" style="display:none"><input type="number" id="appVol" value="0" min="0" oninput="calc()"><span class="suf">/mo</span></div>
   </div>
 
   <div class="inp-group">
@@ -239,7 +239,7 @@ table tbody td:not(:first-child){text-align:right}
 </div>
 
 <script>
-var channels={app:true,eml:false,voi:false};
+var channels={app:false,eml:false,voi:false};
 var defaults={app:13837,eml:10000,voi:5000};
 var volIds={app:'appVol',eml:'emlVol',voi:'voiVol'};
 var arIds={app:'sbAR',eml:'emlAR',voi:'voiAR'};
